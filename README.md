@@ -21,4 +21,5 @@ vagrant destory
 
 # Contributing
 
-TBD
+New Issue https://github.com/timeorg/vagrant-rails-app/issues
+Fork & PR 
