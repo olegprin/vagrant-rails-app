@@ -1,27 +1,42 @@
 #!/bin/bash
 
-VERSION="2.2.4"
+RVM_VERSION="2.2.4"
+IP=`ifconfig eth1 | awk '/inet addr/{print substr($2,6)}'`
+PATH_APP=timeorg-blog
 
+packagelist=(
+  git-core
+  curl
+  zlib1g-dev
+  build-essential
+  libssl-dev
+  libreadline-dev
+  libyaml-dev 
+  libsqlite3-dev
+  sqlite3 
+  libxml2-dev 
+  libxslt1-dev
+  libcurl4-openssl-dev
+  python-software-properties
+  libffi-dev
+  nodejs 
+  imagemagick
+  bundler
+)
 
-sudo apt-get update
-sudo apt-get install -y git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libffi-dev
+echo "runing apt-get update..."
+sudo apt-get -qq update
+echo "installing packages..."
+sudo apt-get -qq install -y ${packagelist[@]}
 
-cd 
-git clone https://github.com/rbenv/rbenv.git ~/.rbenv
-echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
-echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+echo "installing Ruby..."
+curl -sSL https://get.rvm.io | bash > /dev/null 2>&1
+source .rvm/scripts/rvm
+rvm install ${RVM_VERSION} --default > /dev/null 2>&1
 
-git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
-echo 'export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"' >> ~/.bashrc
-
-git clone https://github.com/rbenv/rbenv-gem-rehash.git ~/.rbenv/plugins/rbenv-gem-rehash
-
-echo "Done Part1"
-export PATH="$HOME/.rbenv/bin:$PATH"
-export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
-date
-rbenv install ${VERSION}
-date
-exec $SHELL 
-rbenv global ${VERSION}
-ruby -v
+echo "installing APP..."
+cd ${PATH_APP}
+gem install bundler
+bundle install
+rake db:setup
+rails s -b ${IP}
